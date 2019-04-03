@@ -33,20 +33,6 @@ end
 
 
 """
-`add_traces`
-"""
-function add_traces(ongoing,trk)
-    ranges = select(ongoing,:Range)
-    shifts = select(ongoing,:In)
-    for name in colnames(t)
-        trace = select(t,name)
-        provisory = [ShiftedArray(trace[r],s) for (r,s) in zip(ranges,shifts)]
-        ongoing = pushcol(ongoing, name, provisory)
-    end
-    return ongoing
-end
-
-"""
 `set_range`
 """
 function set_range(v::AbstractArray{<:Real};r = -5:5,fps = 30)
@@ -58,4 +44,19 @@ function set_range(t::IndexedTable;r = -5:5,fps = 30)
     v = select(t,:In)
     r = set_range(v,r=r,fps=fps)
     output = pushcol(t,:Range,r)
+end
+
+"""
+`add_traces`
+"""
+function add_traces(ongoing,trk)
+    ranges = select(ongoing,:Range)
+    shifts = select(ongoing,:In)
+    for name in colnames(trk)
+        trace = select(trk,name)
+        provisory = [ShiftedArray(trace[r],-(s - r.start), default = NaN) for (r,s) in zip(ranges,shifts)]
+        #provisory = [ShiftedArray(trace,s, default = NaN) for s in shifts]
+        ongoing = pushcol(ongoing, name, provisory)
+    end
+    return ongoing
 end
