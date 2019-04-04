@@ -60,3 +60,16 @@ function add_traces(ongoing,trk)
     end
     return ongoing
 end
+
+function combine_BhvTrk(Bhv::String,Trk::String)
+    trk = prepare_trk(Trk)
+    bhv = loadtable(Bhv)
+    ongoing1 = add_events(bhv,trk)
+    ongoing = set_range(ongoing1)
+    final = add_traces(ongoing,trk)
+    return final
+end
+
+function combine_BhvTrk(row::NamedTuple)
+    combine_BhvTrk(row.bhv_file,row.trk_file)
+end

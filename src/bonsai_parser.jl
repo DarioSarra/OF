@@ -34,3 +34,8 @@ function parse_bonsai(pre_t::String)
     t = JuliaDB.loadtable(pre_t)
     parse_bonsai(t)
 end
+
+function parse_bonsai(row::NamedTuple)
+    t = JuliaDB.loadtable(row.trk_file)
+    parse_bonsai(t)
+end
