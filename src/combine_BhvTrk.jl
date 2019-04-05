@@ -54,8 +54,7 @@ function add_traces(ongoing,trk)
     shifts = select(ongoing,:In)
     for name in colnames(trk)
         trace = select(trk,name)
-        provisory = [ShiftedArray(trace[r],-(s - r.start), default = NaN) for (r,s) in zip(ranges,shifts)]
-        #provisory = [ShiftedArray(trace,s, default = NaN) for s in shifts]
+        provisory = [ShiftedArray(trace[r],-(s - first(r)), default = NaN) for (r,s) in zip(ranges,shifts)]
         ongoing = pushcol(ongoing, name, provisory)
     end
     return ongoing
