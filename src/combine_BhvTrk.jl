@@ -22,6 +22,7 @@ function add_events(bhv::IndexedTable,trk::IndexedTable)
     if length(bhv) == length(pre_in)-1
         b2 = pushcol(bhv,:In,pre_in[2:end])
     else
+        println(select(bhv,:MouseID)[1],select(bhv,:Session)[1])
         println("bhv length = ",length(bhv), " trk in length = ", length(pre_in))
     end
     if length(b2) == length(pre_out)-1
