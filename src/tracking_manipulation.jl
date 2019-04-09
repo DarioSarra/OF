@@ -23,7 +23,7 @@ function speed(trk::IndexedTable)
     @transform_vec trk {Speed = speed(:Distance,:Time)}
 end
 
-#####
+
 function conv_time(time::Vector)
     Time = time.-time[1] #subtract the first value to every value
     difference = Time - lag(Time,default = 0) #subtract the previous to the current value, to see where it becomes negative
@@ -38,7 +38,7 @@ function conv_time(time::Vector)
         end
         return Time
     end
-#####
+
 
 function prepare_trk(w::String)
     t = parse_bonsai(w)

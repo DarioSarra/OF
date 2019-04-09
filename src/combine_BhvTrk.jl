@@ -21,14 +21,21 @@ function add_events(bhv::IndexedTable,trk::IndexedTable)
     ##
     if length(bhv) == length(pre_in)-1
         b2 = pushcol(bhv,:In,pre_in[2:end])
+    elseif length(bhv) == length(pre_in)
+        b2 = pushcol(bhv,:In,pre_in)
     else
-        println(select(bhv,:MouseID)[1],select(bhv,:Session)[1])
-        println("bhv length = ",length(bhv), " trk in length = ", length(pre_in))
+        println("bhv length = $(length(bhv)), trk in length = $(length(pre_out))")
+        return nothing
     end
     if length(b2) == length(pre_out)-1
         b3 = pushcol(b2,:Out,pre_out[2:end])
+        return b3
+    elseif length(b2) == length(pre_out)
+        b3 = pushcol(b2,:Out,pre_out)
+        return b3
     else
-        println("bhv length = ",length(b2), " trk out length = ", length(pre_out))
+         println("bhv length = $(length(b2)), trk out length = $(length(pre_out))")
+         return nothing
     end
 end
 
@@ -44,8 +51,12 @@ end
 function set_range(t::IndexedTable;r = -5:5,fps = 30)
     v = select(t,:In)
     r = set_range(v,r=r,fps=fps)
+    if first(r[1]) < 0
+        r[1] = 1:last(r[1])
+    end
     output = pushcol(t,:Range,r)
 end
+
 
 """
 `add_traces`

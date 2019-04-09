@@ -9,7 +9,8 @@ function parse_row(r::String)
     x = [parse(Float64,splitted[2])]
     y = [parse(Float64,splitted[3])]
     time = [parse(Float64,splitted[4])]
-    ongoing = table((Stim_vec = stim, X = x, Y = y, Time = time ))
+    area = [parse(Float64,splitted[5])]
+    ongoing = table((Stim_vec = stim, X = x, Y = y, Time = time, Area = area ))
 end
 
 """
