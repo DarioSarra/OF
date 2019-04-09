@@ -1,37 +1,45 @@
-dir = "/home/beatriz/mainen.flipping.5ht@gmail.com/Flipping/run_task_photo/OF"
-DataIndex = get_DataIndex(dir)
-ex_t = select(DataIndex,:trk_file)[1];
-trk = parse_bonsai(ex_t)
-ex_b = select(DataIndex,:bhv_file)[1];
-b1 = loadtable(ex_b)
-ongoing1 = add_events(b1,t)
-ongoing = set_range(ongoing1)
-ranges = select(ongoing,:Range)
-shifts = select(ongoing,:In)
-trace = select(trk,:Stim_vec)
-final = add_traces(ongoing,t)
-
 using Plots
 using GroupedErrors
 
+dir = "/home/beatriz/mainen.flipping.5ht@gmail.com/Flipping/run_task_photo/OF"
+file = "LB2019-04-05T15_05_10.csv"
+filepath = joinpath(dir,"tracking",file)
+DataIndex = get_DataIndex(dir)
+DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
+    (!occursin("prova",:MouseID)) &&
+    (occursin("SD",:MouseID))
+
+
+    
+DataIndex
+final = combine_sessions(DataIndex)
+
+union(select(DataIndex,:MouseID))
+###
+
+scatter(select(clean,:Distance),select(clean,:Speed))
+
+g = @filter final (:StimFreq !=17) && (:StimFreq !=25) && (:StimFreq !=12)
+
 plt= @> final begin
-    @splitby _.Stim
-    @across _.Block
+    @splitby _.Block
+    @across _.MouseID
     @x -100:100 :discrete
-    @y _.X
+    @y _.Speed
     @plot plot() :ribbon
 end
 
-plt
 
 
+errors = [7,9,10,13]
+DataIndex[13]
 
-reduce_vec(mean,select(final,:X),-5:5)
+i = 9
+Trk = select(DataIndex,:trk_file)[i]
+Bhv = select(DataIndex,:bhv_file)[i]
 
-select(final,:Stim_vec)[40][-5:5]
-
-
-tt = [1,3,54,6,7,2,47,2,5,7,2,34,7,12,6,3,1,42,434,36]
-tt= [true,false,true,false,true,true]
-
-ShiftedArray(tt,-4,default=NaN)
+trk = prepare_trk(Trk)
+bhv = loadtable(Bhv)
+ongoing1 = add_events(bhv,trk)
+ongoing = set_range(ongoing1)
+final = add_traces(ongoing,trk)
