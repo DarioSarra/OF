@@ -64,7 +64,7 @@ end
 function add_traces(ongoing,trk)
     ranges = select(ongoing,:Range)
     shifts = select(ongoing,:In)
-    for name in colnames(trk)
+    for name in [:cm_X,:cm_Y,:Time_sec,:Speed,:Distance]
         trace = select(trk,name)
         provisory = [ShiftedArray(trace[r],-(s - first(r)), default = NaN) for (r,s) in zip(ranges,shifts)]
         ongoing = pushcol(ongoing, name, provisory)

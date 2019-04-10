@@ -2,6 +2,10 @@ function nanZ(v::AbstractArray)
     (v.-NaNMath.mean(v))./NaNMath.std(v)
 end
 
+function convert_px(ax_vec, area_vec)
+    ax_vec./sqrt(NaNMath.mean(area_vec)/(45.4*33))
+end
+
 function distance(x_vec,y_vec)
     x = x_vec - lag(x_vec, default = NaN)
     y = y_vec - lag(y_vec, default = NaN)
@@ -54,12 +58,14 @@ end
 function prepare_trk(w::String)
     t = load_trk(w)
     clean = @apply t begin
-        @transform_vec {zX = nanZ(:X)}
-        @transform_vec {zY = nanZ(:Y)}
+        @transform_vec {cm_X =convert_px(:X,:Area)}
+        @transform_vec {cm_Y =convert_px(:Y,:Area)}
+        @transform_vec {zX = nanZ(:cm_X)}
+        @transform_vec {zY = nanZ(:cm_Y)}
         @transform_vec {Time_ms = conv_time(:Time)}
         @transform {Time_sec = :Time_ms/1000}
-        @transform {cleanX = abs(:zX) > 2 ? NaN : :zX}
-        @transform {cleanY = abs(:zY) > 2 ? NaN : :zY}
+        @transform {cleanX = abs(:zX) > 2 ? NaN : :cm_X}
+        @transform {cleanY = abs(:zY) > 2 ? NaN : :cm_Y}
         @transform_vec {Distance = distance(:cleanX,:cleanY)}
         @transform_vec {Speed = speed(:Distance,:Time_sec)}
     end
