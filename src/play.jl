@@ -4,13 +4,14 @@ using GroupedErrors
 dir = "/home/beatriz/mainen.flipping.5ht@gmail.com/Flipping/run_task_photo/OF"
 file = "LB2019-04-05T15_05_10.csv"
 filepath = joinpath(dir,"tracking",file)
+CSVFiles.read(filepath, delim = ' ')
 DataIndex = get_DataIndex(dir)
 DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
     (!occursin("prova",:MouseID)) &&
     (occursin("SD",:MouseID))
 
 
-    
+
 DataIndex
 final = combine_sessions(DataIndex)
 

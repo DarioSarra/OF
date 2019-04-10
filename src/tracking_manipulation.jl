@@ -1,4 +1,4 @@
-function nanZ(v::Vector)
+function nanZ(v::AbstractArray)
     (v.-NaNMath.mean(v))./NaNMath.std(v)
 end
 
@@ -38,10 +38,21 @@ function conv_time(time::Vector)
         end
         return Time
     end
-
+function load_trk(w::String)
+    t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
+    t = popcol(t, :r)
+    for n in [:X,:Y,:Time,:Area]
+        v = convert(Vector{Float64},select(t,n))
+        t = setcol(t,n =>v)
+    end
+    v = convert(Vector{String},select(t,:Stim_vec))
+    v2 = occursin.("ue",v)
+    t = setcol(t,:Stim_vec =>v2)
+    return t
+end
 
 function prepare_trk(w::String)
-    t = parse_bonsai(w)
+    t = load_trk(w)
     clean = @apply t begin
         @transform_vec {zX = nanZ(:X)}
         @transform_vec {zY = nanZ(:Y)}

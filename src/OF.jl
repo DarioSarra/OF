@@ -3,6 +3,7 @@ using ShiftedArrays
 using Statistics
 using StatsBase
 using NaNMath
+using CSV
 
 include("search_files.jl")
 include("bonsai_parser.jl")
