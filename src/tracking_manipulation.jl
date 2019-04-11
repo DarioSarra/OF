@@ -3,7 +3,8 @@ function nanZ(v::AbstractArray)
 end
 
 function convert_px(ax_vec, area_vec)
-    ax_vec./sqrt(NaNMath.mean(area_vec)/(45.4*33))
+    cm_px = sqrt((45.4*33)/NaNMath.mean(area_vec))
+    ax_vec.*cm_px
 end
 
 function distance(x_vec,y_vec)
@@ -42,6 +43,7 @@ function conv_time(time::Vector)
         end
         return Time
     end
+
 function load_trk(w::String)
     t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
     t = popcol(t, :r)
@@ -53,25 +55,4 @@ function load_trk(w::String)
     v2 = occursin.("ue",v)
     t = setcol(t,:Stim_vec =>v2)
     return t
-end
-
-function prepare_trk(w::String)
-    t = load_trk(w)
-    clean = @apply t begin
-        @transform_vec {cm_X =convert_px(:X,:Area)}
-        @transform_vec {cm_Y =convert_px(:Y,:Area)}
-        @transform_vec {zX = nanZ(:cm_X)}
-        @transform_vec {zY = nanZ(:cm_Y)}
-        @transform_vec {Time_ms = conv_time(:Time)}
-        @transform {Time_sec = :Time_ms/1000}
-        @transform {cleanX = abs(:zX) > 2 ? NaN : :cm_X}
-        @transform {cleanY = abs(:zY) > 2 ? NaN : :cm_Y}
-        @transform_vec {Distance = distance(:cleanX,:cleanY)}
-        @transform_vec {Speed = speed(:Distance,:Time_sec)}
-    end
-    return clean
-end
-
-function prepare_trk(row::NamedTuple)
-    prepare_trk(row.trk_file)
 end
