@@ -10,6 +10,7 @@ trk_db = get_trk_info(trk)
 prepare_trk(trk_db[1])
 
 
+ojkokd
 
 DataIndex = get_DataIndex(dir)
 DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
