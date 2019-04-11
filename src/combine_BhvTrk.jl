@@ -62,14 +62,8 @@ end
 `add_traces`
 """
 function add_traces(ongoing,trk)
-    ranges = select(ongoing,:Range)
-    shifts = select(ongoing,:In)
-    for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance,:Area]
-        trace = select(trk,name)
-        provisory = [ShiftedArray(trace[r],-(s - first(r)), default = NaN) for (r,s) in zip(ranges,shifts)]
-        ongoing = pushcol(ongoing, name, provisory)
-    end
-    return ongoing
+    l = length(ongoing)
+    return pushcol(ongoing, (name => fill(select(trk, name), l) for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance]))
 end
 
 function combine_BhvTrk(Bhv::String,Trk::String)
