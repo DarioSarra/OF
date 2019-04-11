@@ -1,18 +1,21 @@
 using Plots
 using GroupedErrors
-
+include("OF.jl")
 dir = "/home/beatriz/mainen.flipping.5ht@gmail.com/Flipping/run_task_photo/OF"
-file = "LB2019-04-05T15_05_10.csv"
+file = "SD102019-04-08T17_28_58.csv"
 filepath = joinpath(dir,"tracking",file)
-CSVFiles.read(filepath, delim = ' ')
+##
+bhv, trk = get_data(dir)
+trk_db = get_trk_info(trk)
+prepare_trk(trk_db[1])
+
+
+
 DataIndex = get_DataIndex(dir)
 DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
     (!occursin("prova",:MouseID)) &&
     (occursin("SD",:MouseID))
 
-
-
-DataIndex
 final = combine_sessions(DataIndex)
 
 union(select(DataIndex,:MouseID))
@@ -20,14 +23,14 @@ union(select(DataIndex,:MouseID))
 
 scatter(select(clean,:Distance),select(clean,:Speed))
 
-g = @filter final (:StimFreq !=17) && (:StimFreq !=25) && (:StimFreq !=12)
+g = @filter final (:Block <4) && (:StimFreq !=25) && (:StimFreq !=12)
 
-plt= @> final begin
+plt= @> g begin
     @splitby _.Block
     @across _.MouseID
     @x -100:100 :discrete
     @y _.Speed
-    @plot plot() :ribbon
+    @plot plot(fillalpha = 0.2,line =3) :ribbon
 end
 
 
