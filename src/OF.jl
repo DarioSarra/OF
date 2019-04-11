@@ -4,6 +4,7 @@ using Statistics
 using StatsBase
 using NaNMath
 using CSV
+using OffsetArrays
 
 include("search_files.jl")
 include("extract_file_info.jl")
