@@ -45,9 +45,16 @@ function conv_time(time::Vector)
     end
 
 function load_trk(w::String)
-    t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
-    t = popcol(t, :r)
+    try
+        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r],allowmissing=:all)|>table
+        t = popcol(t, :r)
+    catch
+        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area])|>table
+    end
     for n in [:X,:Y,:Time,:Area]
+        if any(isna, select(t,n))
+
+        end
         v = convert(Vector{Float64},select(t,n))
         t = setcol(t,n =>v)
     end
