@@ -70,7 +70,8 @@ function add_traces(ongoing,trace)
 end
 
 function combine_BhvTrk(Bhv::String,Traces::String)
-    traces = load_table(Traces)
+    traces = CSV.read(Traces, allowmissing = :auto, truestrings = ["true"], falsestrings = ["false"]) |> table
+    #traces = loadtable(Traces)
     bhv = loadtable(Bhv)
     ongoing1 = add_events(bhv,traces)
     ongoing = set_range(ongoing1)
