@@ -73,6 +73,7 @@ function combine_BhvTrk(Bhv::String,Traces::String)
     traces = CSV.read(Traces, allowmissing = :auto, truestrings = ["true"], falsestrings = ["false"]) |> table
     #traces = loadtable(Traces)
     bhv = loadtable(Bhv)
+    bhv = setcol(bhv,:Gen,gen.(select(bhv,:MouseID)))
     ongoing1 = add_events(bhv,traces)
     ongoing = set_range(ongoing1)
     final = add_traces(ongoing,traces)
@@ -80,5 +81,6 @@ function combine_BhvTrk(Bhv::String,Traces::String)
 end
 
 function combine_BhvTrk(row::NamedTuple)
-    combine_BhvTrk(row.bhv_file,row.traces_file)
+    d = combine_BhvTrk(row.bhv_file,row.traces_file)
+    b = setcol(d,:Day, fill(parse.(Float64,row.Day),length(d)))
 end

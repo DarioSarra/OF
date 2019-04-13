@@ -1,26 +1,37 @@
 using Plots
 using Recombinase
 using Recombinase: aroundindex
+using Recombinase: fitvec
+using OnlineStats: Mean, Variance
+
 plot(rand(10))
 include("OF.jl")
 
-dir = "/home/pietro/pietro.vertechi@neuro.fchampalimaud.org/Flipping/run_task_photo/OF/"
-file = "LB2019-04-05T15_05_10.csv"
-filepath = joinpath(dir,"tracking",file)
+dir =joinpath("/Volumes/GoogleDrive/My Drive/Flipping/run_task_photo/OF")
+
 DataIndex = get_DataIndex(dir)
-DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
-    (!occursin("prova",:MouseID)) &&
-    (occursin("SD",:MouseID))
+DataIndex = @filter (occursin("SD",:MouseID))
 
+final = combine_sessions(DataIndex)
+union(select(final,:Stim))
 
-DataIndex
-final = combine_sessions(DataIndex);
-colnames(final)
-union(select(DataIndex,:MouseID))
+g = @filter final (:Gen !="HET") &&
+    (:Day > 190408) &&
+    (:StimFreq < 2000)
+
+args, kwargs = Recombinase.series2D(
+    Recombinase.prediction(axis = -100:100),
+    g,
+    Recombinase.Group(:Stim),
+    axis = -100:100,
+    select = (:Offsets, :Speed),
+    error = :MouseID,
+    ribbon = true)
+
+plot(args...; kwargs...)
+
 ###
 
-using Recombinase: fitvec
-using OnlineStats: Mean, Variance
 
 traces = (aroundindex(row.Speed, row.In, row.Range .- row.In) for row in rows(final))
 first(traces)
@@ -35,7 +46,8 @@ view(x, OffsetArray(axes(x, 1), -5))
 # x vettore fai view
 # add widgets for keywords
 
-s = fitvec((Mean, Variance), traces, -10000:100)
+s = fitvec((Mean, Variance), traces, -100:100)
+select(s,:Mean)
 axes(s, 1)
 
 table(parent(s))
@@ -54,18 +66,3 @@ plt= @> final begin
     @y _.Speed
     @plot plot() :ribbon
 end
-
-
-
-errors = [7,9,10,13]
-DataIndex[13]
-
-i = 9
-Trk = select(DataIndex,:trk_file)[i]
-Bhv = select(DataIndex,:bhv_file)[i]
-
-trk = prepare_trk(Trk)
-bhv = loadtable(Bhv)
-ongoing1 = add_events(bhv,trk)
-ongoing = set_range(ongoing1)
-final = add_traces(ongoing,trk)
