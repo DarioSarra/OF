@@ -15,9 +15,9 @@ end
 """
 `add_events`
 """
-function add_events(bhv::IndexedTable,trk::IndexedTable)
-    pre_in = find_events(select(trk,:Stim_vec),:in)
-    pre_out= find_events(select(trk,:Stim_vec),:out)
+function add_events(bhv::IndexedTable,trace::IndexedTable)
+    pre_in = find_events(select(trace,:Stim_vec),:in)
+    pre_out= find_events(select(trace,:Stim_vec),:out)
     ##
     if length(pre_in) == length(pre_out)
         if length(bhv) == length(pre_in)-1
@@ -28,10 +28,10 @@ function add_events(bhv::IndexedTable,trk::IndexedTable)
             b2 = pushcol(bhv,:In,pre_in)
             b3 = pushcol(b2,:Out,pre_out)
             return b3
-        elseif length(bhv) < length(trk)
-            trk = ghosts_buster(trk)
-            pre_in = find_events(select(trk,:Stim_vec),:in)
-            pre_out= find_events(select(trk,:Stim_vec),:out)
+        elseif length(bhv) < length(trace)
+            trace = ghosts_buster(trace)
+            pre_in = find_events(select(trace,:Stim_vec),:in)
+            pre_out= find_events(select(trace,:Stim_vec),:out)
             b2 = pushcol(bhv,:In,pre_in[2:end])
             b3 = pushcol(b2,:Out,pre_out[2:end])
             return b3
@@ -64,20 +64,20 @@ end
 """
 `add_traces`
 """
-function add_traces(ongoing,trk)
+function add_traces(ongoing,trace)
     l = length(ongoing)
-    return pushcol(ongoing, (name => fill(select(trk, name), l) for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance]))
+    return pushcol(ongoing, (name => fill(select(trace, name), l) for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance]))
 end
 
-function combine_BhvTrk(Bhv::String,Trk::String)
-    trk = prepare_trk(Trk)
+function combine_BhvTrk(Bhv::String,Traces::String)
+    traces = load_table(Traces)
     bhv = loadtable(Bhv)
-    ongoing1 = add_events(bhv,trk)
+    ongoing1 = add_events(bhv,traces)
     ongoing = set_range(ongoing1)
-    final = add_traces(ongoing,trk)
+    final = add_traces(ongoing,traces)
     return final
 end
 
 function combine_BhvTrk(row::NamedTuple)
-    combine_BhvTrk(row.bhv_file,row.trk_file)
+    combine_BhvTrk(row.bhv_file,row.traces_file)
 end

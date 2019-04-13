@@ -45,18 +45,21 @@ function conv_time(time::Vector)
     end
 
 function load_trk(w::String)
-    try
-        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
-        t = popcol(t, :r)
-    catch
-        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area])|>table
-    end
-    for n in [:X,:Y,:Time,:Area]
-        v = convert(Vector{Float64},select(t,n))
-        t = setcol(t,n =>v)
-    end
-    v = convert(Vector{String},select(t,:Stim_vec))
-    v2 = occursin.("ue",v)
-    t = setcol(t,:Stim_vec =>v2)
+    df = CSV.read(pre_t, delim = ' ', allowmissing = :auto, truestrings = ["True"], falsestrings = ["False"])
+    t = table(df)
+    renamecol(t, 1 => :Stim_vec, 2 => :X, 3 => :Y, 4 => :Time, 5 => :Area)
+    # try
+    #     t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
+    #     t = popcol(t, :r)
+    # catch
+    #     t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area])|>table
+    # end
+    # for n in [:X,:Y,:Time,:Area]
+    #     v = convert(Vector{Float64},select(t,n))
+    #     t = setcol(t,n =>v)
+    # end
+    # v = convert(Vector{String},select(t,:Stim_vec))
+    # v2 = occursin.("ue",v)
+    # t = setcol(t,:Stim_vec =>v2)
     return t
 end
