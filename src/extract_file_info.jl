@@ -94,6 +94,10 @@ function get_trk_info(trk::Vector{String})
     d_t = get_trk_date_info.(t)
     m_t = get_trk_mouse_info.(t)
     session_t = m_t.*"_".*d_t
-    indexed_table = table((Day = d_t, MouseID = m_t, Session = session_t, trk_file = trk))
-
+    pre_process_dir = joinpath(dirname(dirname(trk[1])),"processed_traces")
+    if !ispath(pre_process_dir)
+        mkdir(pre_process_dir)
+    end
+    traces = joinpath.(pre_process_dir,("traces".*session_t.*".csv"))
+    indexed_table = table((Day = d_t, MouseID = m_t, Session = session_t, trk_file = trk,traces_file = traces))
 end

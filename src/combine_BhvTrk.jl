@@ -19,23 +19,26 @@ function add_events(bhv::IndexedTable,trk::IndexedTable)
     pre_in = find_events(select(trk,:Stim_vec),:in)
     pre_out= find_events(select(trk,:Stim_vec),:out)
     ##
-    if length(bhv) == length(pre_in)-1
-        b2 = pushcol(bhv,:In,pre_in[2:end])
-    elseif length(bhv) == length(pre_in)
-        b2 = pushcol(bhv,:In,pre_in)
+    if length(pre_in) == length(pre_out)
+        if length(bhv) == length(pre_in)-1
+            b2 = pushcol(bhv,:In,pre_in[2:end])
+            b3 = pushcol(b2,:Out,pre_out[2:end])
+            return b3
+        elseif length(bhv) == length(pre_in)
+            b2 = pushcol(bhv,:In,pre_in)
+            b3 = pushcol(b2,:Out,pre_out)
+            return b3
+        elseif length(bhv) < length(trk)
+            trk = ghosts_buster(trk)
+            pre_in = find_events(select(trk,:Stim_vec),:in)
+            pre_out= find_events(select(trk,:Stim_vec),:out)
+            b2 = pushcol(bhv,:In,pre_in[2:end])
+            b3 = pushcol(b2,:Out,pre_out[2:end])
+            return b3
+        end
     else
-        println("bhv length = $(length(bhv)), trk in length = $(length(pre_out))")
-        return nothing
-    end
-    if length(b2) == length(pre_out)-1
-        b3 = pushcol(b2,:Out,pre_out[2:end])
-        return b3
-    elseif length(b2) == length(pre_out)
-        b3 = pushcol(b2,:Out,pre_out)
-        return b3
-    else
-         println("bhv length = $(length(b2)), trk out length = $(length(pre_out))")
-         return nothing
+        println("in and out not matching")
+        println("in length = $(length(pre_in)), out length = $(length(pre_out))")
     end
 end
 
