@@ -10,25 +10,33 @@ include("OF.jl")
 dir =joinpath("/Volumes/GoogleDrive/My Drive/Flipping/run_task_photo/OF")
 
 DataIndex = get_DataIndex(dir)
-DataIndex = @filter (occursin("SD",:MouseID))
+
 
 final = combine_sessions(DataIndex)
 union(select(final,:Stim))
 
-g = @filter final (:Gen !="HET") &&
+d = @transform final {on = :StimFreq > 1}
+
+g = @filter d (:Gen =="HET") &&
     (:Day > 190408) &&
-    (:StimFreq < 2000)
+    (in(:StimFreq,[0,25,30])) &&
+    (:Stim==1)
 
 args, kwargs = Recombinase.series2D(
-    Recombinase.prediction(axis = -100:100),
+    Recombinase.prediction(axis = -200:200),
     g,
-    Recombinase.Group(:Stim),
+    Recombinase.Group(:StimFreq),
     axis = -100:100,
     select = (:Offsets, :Speed),
     error = :MouseID,
     ribbon = true)
 
-plot(args...; kwargs...)
+plot(args...; kwargs...,
+    title = "Stim Frequency \n only stim blocks",
+    xlabel = "frame from trial start \n 30fps",
+    ylabel = "cm/s",
+    linewidth = 2,
+    fillalpha = 0.2)
 
 ###
 
