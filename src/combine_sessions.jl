@@ -1,14 +1,15 @@
 function combine_sessions(DataIndex)
-    r = select(DataIndex,(:bhv_file,:trk_file))[1]
+    r = DataIndex[1]
     ongoing = combine_BhvTrk(r)
     for i = 2:length(DataIndex)
-        r = select(DataIndex,(:bhv_file,:trk_file))[i]
+        r = DataIndex[i]
         try
             provisory = combine_BhvTrk(r)
             append!(rows(ongoing), rows(provisory))
-        catch
+        catch ex
             #@warn("Session not processed: DataIndex $i")
             println("Session not processed: DataIndex $i")
+            show(ex)
             continue
         end
     end
