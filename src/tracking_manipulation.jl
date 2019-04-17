@@ -3,7 +3,8 @@ function nanZ(v::AbstractArray)
 end
 
 function convert_px(ax_vec, area_vec)
-    cm_px = sqrt((45.4*33)/NaNMath.mean(area_vec))
+    interval  = 7*60*30:13*60*30 #take measurements from minutes 7 to 13
+    cm_px = sqrt((45.4*33)/NaNMath.mean(area_vec[interval]))
     ax_vec.*cm_px
 end
 
@@ -15,18 +16,18 @@ function distance(x_vec,y_vec)
     distance = sqrt.(X.+Y)
 end
 
-function distance(trk::IndexedTable)
-    @transform_vec trk {Distance = distance(:cleanX,:cleanY)}
-end
+# function distance(trk::IndexedTable)
+#     @transform_vec trk {Distance = distance(:cleanX,:cleanY)}
+# end
 #####elapsed_t already used here = Time
 function speed(dist_vec,time_vec)
-    elapsed_t = time_vec - lag(time_vec, default= NaN)
+    elapsed_t = time_vec .- lag(time_vec, default= NaN)
     speed = dist_vec ./ elapsed_t
 end
 
-function speed(trk::IndexedTable)
-    @transform_vec trk {Speed = speed(:Distance,:Time)}
-end
+# function speed(trk::IndexedTable)
+#     @transform_vec trk {Speed = speed(:Distance,:Time)}
+# end
 
 
 function conv_time(time::Vector)

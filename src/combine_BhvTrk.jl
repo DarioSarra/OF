@@ -66,7 +66,7 @@ end
 """
 function add_traces(ongoing,trace)
     l = length(ongoing)
-    return pushcol(ongoing, (name => fill(select(trace, name), l) for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance]))
+    return pushcol(ongoing, (name => fill(select(trace, name), l) for name in [:cleanX,:cleanY,:Time_sec,:Speed,:Distance,:ZSpeed]))
 end
 
 function combine_BhvTrk(Bhv::String,Traces::String)
