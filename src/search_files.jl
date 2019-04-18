@@ -55,4 +55,8 @@ function get_DataIndex(dir::String)
     bhv_db = get_bhv_info(bhv)
     trk_db = get_trk_info(trk)
     DataIndex = join(bhv_db,trk_db,how = :inner,lkey = (:Session,:Day,:MouseID),rkey = (:Session,:Day,:MouseID))
+    for n in [:Session,:Day,:MouseID]
+        @with DataIndex cols(n) .= string.(cols(n))
+    end
+    return DataIndex
 end
