@@ -45,16 +45,8 @@ function conv_time(time::Vector)
     end
 
 function load_trk(w::String)
-<<<<<<< HEAD
     try
         t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r],allowmissing=:all)|>table
-=======
-    # df = CSV.read(w, delim = ' ', allowmissing = :auto, truestrings = ["True"], falsestrings = ["False"])
-    # t = table(df)
-    # renamecol(t, 1 => :Stim_vec, 2 => :X, 3 => :Y, 4 => :Time, 5 => :Area)
-    try
-        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
->>>>>>> 5a550b85ea96c773d60319c08644a3d7aac76d54
         t = popcol(t, :r)
     catch
         t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area])|>table
