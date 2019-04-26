@@ -2,10 +2,18 @@ function nanZ(v::AbstractArray)
     (v.-NaNMath.mean(v))./NaNMath.std(v)
 end
 
-function convert_px(ax_vec, area_vec)
+function convert_px(ax_vec, ref_vec,real_val)
     interval  = 7*60*30:13*60*30 #take measurements from minutes 7 to 13
-    cm_px = sqrt((45.4*33)/NaNMath.mean(area_vec[interval]))
+    cm_px = sqrt(real_val/NaNMath.mean(ref_vec[interval]))
     ax_vec.*cm_px
+end
+
+function distance(x1_vec,y1_vec,x2_vec,y2_vec)
+    x = x1_vec -x2_vec
+    y = y1_vec - y2_vec
+    X = x.^2
+    Y = y.^2
+    distance = sqrt.(X.+Y)
 end
 
 function distance(x_vec,y_vec)
@@ -47,17 +55,39 @@ function conv_time(time::Vector)
 
 function load_trk(w::String)
     try
-        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r],allowmissing=:all)|>table
+    t = CSV.read(w,delim = ' ',datarow = 2,allowmissing=:all)|>table
+    if length(t[1]) == 6
+        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:r])|>table
         t = popcol(t, :r)
-    catch
+    elseif length(t[1]) == 5
         t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area])|>table
-    end
-    for n in [:X,:Y,:Time,:Area]
-        if any(isna, select(t,n))
-
+    elseif length(t[1]) == 8
+        try
+            t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y])|>table
+        catch
+            t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y,:r])|>table
+            t = popcol(t, :r)
         end
-        v = convert(Vector{Float64},select(t,n))
-        t = setcol(t,n =>v)
+    elseif length(t[1]) == 9
+        try
+            t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y])|>table
+        catch
+            t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y,:r])|>table
+            t = popcol(t, :r)
+        end
+    elseif length(t[1]) == 10
+        t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y,:r])|>table
+        t = popcol(t, :r)
+    end
+catch ex
+        println(ex)
+        return nothing
+    end
+    for n in [:X,:Y,:Time,:Area,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y]
+        if in(n,colnames(t))
+            v = convert(Vector{Float64},select(t,n))
+            t = setcol(t,n =>v)
+        end
     end
     v = convert(Vector{String},select(t,:Stim_vec))
     v2 = occursin.("ue",v)

@@ -1,8 +1,7 @@
-function prepare_trk(w::String)
-    t = load_trk(w)
+function prepare_trk_old(t::IndexedTable)
     clean = @apply t begin
-        @transform_vec {cm_X = convert_px(:X,:Area)}
-        @transform_vec {cm_Y = convert_px(:Y,:Area)}
+        @transform_vec {cm_X = convert_px(:X,:Area,45.4*33)}
+        @transform_vec {cm_Y = convert_px(:Y,:Area,45.4*33)}
         @transform_vec {zX = nanZ(:X)}
         @transform_vec {zY = nanZ(:Y)}
         @transform {cleanX = abs(:zX) > 2 ? NaN : :cm_X}
@@ -16,12 +15,35 @@ function prepare_trk(w::String)
     return clean
 end
 
-function prepare_trk(row::NamedTuple)
+function prepare_trk_new(t::IndexedTable)
+    clean = @apply t begin
+        @transform_vec {ref_distance = distance(:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y)}
+        @transform_vec {cm_X = convert_px(:X,:ref_distance,30)}
+        @transform_vec {cm_Y = convert_px(:Y,:ref_distance,30)}
+        @transform_vec {zX = nanZ(:X)}
+        @transform_vec {zY = nanZ(:Y)}
+        @transform {cleanX = abs(:zX) > 2 ? NaN : :cm_X}
+        @transform {cleanY = abs(:zY) > 2 ? NaN : :cm_Y}
+        @transform_vec {Distance = distance(:cleanX,:cleanY)}
+        @transform_vec {Time_ms = conv_time(:Time)}
+        @transform {Time_sec = :Time_ms/1000}
+        @transform_vec {Speed = speed(:Distance,:Time_sec)}
+        @transform_vec {ZSpeed = nanZ(:Speed)}
+    end
+    return clean
+end
+
+function prepare_old(row::NamedTuple)
     prepare_trk(row.trk_file)
 end
 
 function verify_trk(Trk,Bhv)
-    trk = prepare_trk(Trk)
+    t = load_trk(Trk)
+    if in(:Ref1_x,colnames(t))
+        trk = prepare_trk_new(t)
+    else
+        trk = prepare_trk_old(t)
+    end
     bhv = loadtable(Bhv)
     pre_in = find_events(select(trk,:Stim_vec),:in)
     pre_out= find_events(select(trk,:Stim_vec),:out)
@@ -81,6 +103,7 @@ end
 
 function preprocess_trk(DataIndex::IndexedTable)
     for idx = 1:length(DataIndex)
+        println(idx)
         r = DataIndex[idx]
         if !ispath(r.traces_file)
             preprocess_trk(r)
