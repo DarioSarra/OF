@@ -10,36 +10,45 @@ include("OF.jl")
 dir =joinpath("/Volumes/GoogleDrive/My Drive/Flipping/run_task_photo/OF")
 
 DataIndex = get_DataIndex(dir)
-
-
+DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
+    (!occursin("prova",:MouseID)) &&
+    (occursin("SD",:MouseID)) &&
+    (parse(Float64,:Day) > 190408)
 final = combine_sessions(DataIndex)
-union(select(final,:Stim))
 
-d = @transform final {on = :StimFreq > 1}
+d = @apply final begin
+    @transform {on = :StimFreq > 1}
+    @transform {Sessione = :MouseID *"_"*string(:Day)}
+end
 
+##
 g = @filter d (:Gen =="HET") &&
-    (:Day > 190408) &&
-    (in(:StimFreq,[0,25,30])) &&
-    (:Stim==1)
+    (in(:StimFreq,[0,25,16])) &&
+    (:Stim==1)&&
+    (:Sessione != "SD5_190414.0")
+
 
 args, kwargs = Recombinase.series2D(
-    Recombinase.prediction(axis = -200:200),
+    Recombinase.prediction(axis = 0:60),
     g,
     Recombinase.Group(:StimFreq),
-    axis = -100:100,
-    select = (:Offsets, :Speed),
+    axis = -60:90,
+    select = (:Offsets, :ZSpeed),
     error = :MouseID,
     ribbon = true)
 
 plot(args...; kwargs...,
-    title = "Stim Frequency \n only stim blocks",
-    xlabel = "frame from trial start \n 30fps",
-    ylabel = "cm/s",
-    linewidth = 2,
-    fillalpha = 0.2)
+    title = "Frequencies effect HET \n only stim blocks",
+    xlabel = "frame from trial start (30fps)",
+    ylabel = "z-scored cm/s",
+    linewidth = 1,
+    fillalpha = 0.3)
 
 ###
-
+savefolder = "/Users/dariosarra/Documents/Lab/Mainen/Presentations/Lab_meeting/Lab_meeting 2019-04-16"
+fig = "Z-time-16-25-HET.pdf"
+savepath = joinpath(savefolder,fig)
+savefig(savepath)
 
 traces = (aroundindex(row.Speed, row.In, row.Range .- row.In) for row in rows(final))
 first(traces)
