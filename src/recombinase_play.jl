@@ -13,7 +13,10 @@ DataIndex = get_DataIndex(dir)
 DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
     (!occursin("prova",:MouseID)) &&
     (occursin("SD",:MouseID)) &&
-    (parse(Float64,:Day) > 190408)
+    (parse(Float64,:Day) > 190428)
+    
+#preprocess_trk(DataIndex)
+
 final = combine_sessions(DataIndex)
 
 d = @apply final begin
@@ -23,16 +26,15 @@ end
 
 ##
 g = @filter d (:Gen =="HET") &&
-    (in(:StimFreq,[0,25,16])) &&
-    (:Stim==1)&&
-    (:Sessione != "SD5_190414.0")
+    (:Day >190429)&&
+    (in(:StimFreq,[0,16,20]))
+    ##(:Sessione != "SD5_190414.0")
 
 
 args, kwargs = Recombinase.series2D(
-    Recombinase.prediction(axis = 0:60),
+    Recombinase.prediction(axis = -30:90),
     g,
     Recombinase.Group(:StimFreq),
-    axis = -60:90,
     select = (:Offsets, :ZSpeed),
     error = :MouseID,
     ribbon = true)

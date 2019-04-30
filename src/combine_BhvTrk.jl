@@ -51,11 +51,15 @@ function set_range(v::AbstractArray{<:Real};r = -5:5,fps = 30)
     stop = r.stop*fps
     [x + start : x + stop for x in v]
 end
+
 function set_range(t::IndexedTable;r = -5:5,fps = 30)
     v = select(t,:In)
     r = set_range(v,r=r,fps=fps)
     if first(r[1]) < 0
         r[1] = 1:last(r[1])
+    end
+    if last(r[end]) > length(t)
+        r[end] = first(r[end]):length(t)
     end
     output = pushcol(t,:Range,r)
 end
