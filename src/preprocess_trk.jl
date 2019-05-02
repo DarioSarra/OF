@@ -24,7 +24,7 @@ function load_trk(w::String)
         t = CSV.read(w,delim = ' ',datarow = 2,header =[:Stim_vec,:X,:Y,:Time,:Area,:Ref1_x,:Ref1_y,:Ref2_x,:Ref2_y,:r])|>table
         t = popcol(t, :r)
     end
-catch ex
+    catch ex
         println(ex)
         return nothing
     end
