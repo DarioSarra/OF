@@ -1,12 +1,10 @@
 using Plots
 using Recombinase
-using Recombinase: aroundindex
-using Recombinase: fitvec
 using OnlineStats: Mean, Variance
 
 plot(rand(10))
 include("OF.jl")
-
+##
 dir =joinpath("/Volumes/GoogleDrive/My Drive/Flipping/run_task_photo/OF")
 
 DataIndex = get_DataIndex(dir)
@@ -14,7 +12,7 @@ DataIndex = @filter DataIndex (!occursin("test",:MouseID)) &&
     (!occursin("prova",:MouseID)) &&
     (occursin("SD",:MouseID)) &&
     (parse(Float64,:Day) > 190428)
-    
+
 #preprocess_trk(DataIndex)
 
 final = combine_sessions(DataIndex)
